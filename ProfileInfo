@@ -1,0 +1,386 @@
+import React, { useState } from "react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Box,
+  Typography,
+  Checkbox,
+  IconButton,
+  Avatar,
+  Divider,
+  Button,
+  useMediaQuery,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  Chip,
+} from "@mui/material";
+import { useTheme } from "@mui/material/styles";
+import CloseIcon from "@mui/icons-material/Close";
+import EmailIcon from "@mui/icons-material/Email";
+import PhoneIcon from "@mui/icons-material/Phone";
+import LocationOnIcon from "@mui/icons-material/LocationOn";
+import StarBorderIcon from "@mui/icons-material/StarBorder";
+import MailOutlineIcon from "@mui/icons-material/MailOutline";
+import BusinessIcon from "@mui/icons-material/Business";
+import GroupIcon from "@mui/icons-material/Group";
+import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
+import LinkedInIcon from "@mui/icons-material/LinkedIn";
+import InstagramIcon from "@mui/icons-material/Instagram";
+import TwitterIcon from "@mui/icons-material/Twitter";
+
+const rows = [
+  {
+    id: 1,
+    name: "Lorraine L.",
+    designation: "Director",
+    company: "New York Road Runners, Inc.",
+    About:
+      "Experienced Fin tech Engineer with 15 years Of Experience in a leading Tech Firm",
+    companydetails: [
+      { industry: "Technology", EmployeeSize: 5400, revenue: "7B+" },
+    ],
+    contactdetails: [
+      {
+        email: "RefractConsulting@gmail.com",
+        phone: "+91 9876543210",
+        location: "San Francisco",
+      },
+    ],
+    sills: ["Javascript", "Java", "DataBase Management", "Oracle"],
+    socials: {
+      linkedin: "https://linkedin.com",
+      instagram: "https://instagram.com",
+      twitter: "https://twitter.com",
+    },
+    avatar: "https://i.pravatar.cc/40?img=1",
+  },
+  {
+    id: 2,
+    name: "Lorraine Jackson",
+    designation: "Director",
+    company: "Department of Health and Social Care",
+    companydetails: [
+      { industry: "Healthcare", EmployeeSize: 12000, revenue: "5B+" },
+    ],
+    contactdetails: [
+      {
+        email: "lorraine.jackson@example.com",
+        phone: "+91 9876543211",
+        location: "New York",
+      },
+    ],
+    sills: ["Javascript", "Java", "DataBase Management", "Oracle"],
+    socials: {
+      linkedin: "https://linkedin.com",
+      instagram: "https://instagram.com",
+      twitter: "https://twitter.com",
+    },
+    About:
+      "Experienced Fin tech Engineer with 15 years Of Experience in a leading Tech Firm",
+    avatar: "https://i.pravatar.cc/40?img=2",
+  },
+];
+
+export default function Profile() {
+  const [selectedRow, setSelectedRow] = useState(null);
+  const [checkedRows, setCheckedRows] = useState([]);
+  const isSmallScreen = useMediaQuery("(max-width:768px)");
+  const theme = useTheme();
+
+  const handleCheck = (id) => {
+    setCheckedRows((prev) =>
+      prev.includes(id) ? prev.filter((rowId) => rowId !== id) : [...prev, id]
+    );
+  };
+
+  const handleClose = () => setSelectedRow(null);
+
+  const PanelContent = () => (
+    <Box
+      p={2}
+      sx={{
+        height: "100%",
+        overflowY: "auto",
+      }}
+    >
+      {!isSmallScreen && (
+        <IconButton
+          onClick={handleClose}
+          sx={{ position: "absolute", top: 10, right: 10 }}
+        >
+          <CloseIcon />
+        </IconButton>
+      )}
+
+      <Box
+        display="flex"
+        alignItems="center"
+        gap={2}
+        mb={2}
+        flexDirection={isSmallScreen ? "column" : "row"}
+      >
+        <Avatar src={selectedRow.avatar} sx={{ width: 60, height: 60 }} />
+        <Box textAlign={isSmallScreen ? "center" : "left"}>
+          <Typography variant="h6">{selectedRow.name}</Typography>
+          <Typography variant="subtitle2" color="text.secondary">
+            {selectedRow.designation}
+          </Typography>
+          
+          <Typography variant="body2" color="text.secondary">
+          <LocationOnIcon fontSize="small" color="primary" />
+            {selectedRow.company}
+          </Typography>
+        </Box>
+      </Box>
+
+      <Divider sx={{ my: 2 }} />
+
+      <Box>
+        <Typography variant="h6" color="black">
+          About
+        </Typography>
+        <Typography fontStyle="italic" color="grey">
+          {selectedRow.About}
+        </Typography>
+      </Box>
+
+      <Divider sx={{ my: 2 }} />
+
+      <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+        Contact Information
+      </Typography>
+  {selectedRow.contactdetails.map((c, idx) => (
+        <React.Fragment key={idx}>
+          <Box mb={1}>
+            <Typography variant="caption" color="textSecondary">
+              Email
+            </Typography>
+            <Box display="flex" alignItems="center" gap={1}>
+              <EmailIcon fontSize="small" color="primary" />
+              <Typography variant="body2">{c.email}</Typography>
+            </Box>
+          </Box>
+
+          <Box mb={1}>
+            <Typography variant="caption" color="textSecondary">
+              Phone
+            </Typography>
+            <Box display="flex" alignItems="center" gap={1}>
+              <PhoneIcon fontSize="small" color="primary" />
+              <Typography variant="body2">{c.phone}</Typography>
+            </Box>
+          </Box>
+
+          <Box mb={1}>
+            <Typography variant="caption" color="textSecondary">
+              Location
+            </Typography>
+            <Box display="flex" alignItems="center" gap={1}>
+              <LocationOnIcon fontSize="small" color="primary" />
+              <Typography variant="body2">{c.location}</Typography>
+            </Box>
+          </Box>
+        </React.Fragment>
+      ))}
+
+      <Divider sx={{ my: 2 }} />
+
+      <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+        Company Information
+      </Typography>
+      {selectedRow.companydetails.map((c, idx) => (
+        <React.Fragment key={idx}>
+          <Box mb={1}>
+            <Typography variant="caption" color="textSecondary">
+              Industry
+            </Typography>
+            <Box display="flex" alignItems="center" gap={1}>
+              <BusinessIcon fontSize="small" color="primary" />
+              <Typography variant="body2">{c.industry}</Typography>
+            </Box>
+          </Box>
+
+          <Box mb={1}>
+            <Typography variant="caption" color="textSecondary">
+              Employee Size
+            </Typography>
+            <Box display="flex" alignItems="center" gap={1}>
+              <GroupIcon fontSize="small" color="primary" />
+              <Typography variant="body2">{c.EmployeeSize}</Typography>
+            </Box>
+          </Box>
+
+          <Box mb={1}>
+            <Typography variant="caption" color="textSecondary">
+              Revenue
+            </Typography>
+            <Box display="flex" alignItems="center" gap={1}>
+              <MonetizationOnIcon fontSize="small" color="primary" />
+              <Typography variant="body2">{c.revenue}</Typography>
+            </Box>
+          </Box>
+        </React.Fragment>
+      ))}
+
+      <Divider sx={{ my: 2 }} />
+
+      <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+        Skills
+      </Typography>
+      <Box display="flex" flexWrap="wrap" gap={1}>
+        {selectedRow.sills.map((skill, idx) => (
+          <Chip
+            key={idx}
+            label={skill}
+            color="primary"
+            variant="outlined"
+            size="small"
+          />
+        ))}
+      </Box>
+
+      <Divider sx={{ my: 2 }} />
+
+      <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+        Social Profiles
+      </Typography>
+      <Box display="flex" gap={2}>
+        <IconButton
+          component="a"
+          href={selectedRow.socials.linkedin}
+          target="_blank"
+        >
+          <LinkedInIcon color="primary" />
+        </IconButton>
+        <IconButton
+          component="a"
+          href={selectedRow.socials.instagram}
+          target="_blank"
+        >
+          <InstagramIcon sx={{ color: "#E1306C" }} />
+        </IconButton>
+        <IconButton
+          component="a"
+          href={selectedRow.socials.twitter}
+          target="_blank"
+        >
+          <TwitterIcon sx={{ color: "#1DA1F2" }} />
+        </IconButton>
+      </Box>
+
+      <Box
+        display="flex"
+        gap={2}
+        mt={3}
+        flexDirection={isSmallScreen ? "column" : "row"}
+      >
+      </Box>
+    </Box>
+  );
+
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "row",
+        width: "100%",
+        height: "100vh",
+        bgcolor: "#f0f0f0",
+        p: 2,
+      }}
+    >
+
+      <Box
+        sx={{
+          flex: selectedRow && !isSmallScreen ? 0.6 : 1,
+          transition: "flex 0.3s ease",
+        }}
+      >
+        <TableContainer component={Paper} sx={{ bgcolor: "#fff" }}>
+          <Table>
+            <TableHead>
+              <TableRow sx={{ bgcolor: "#f5f5f5" }}>
+                <TableCell padding="checkbox"></TableCell>
+                <TableCell>Profile</TableCell>
+                <TableCell>Name</TableCell>
+                <TableCell>Designation</TableCell>
+                <TableCell>Company Name</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {rows.map((row, index) => (
+                <TableRow
+                  key={row.id}
+                  hover
+                  sx={{
+                    cursor: "pointer",
+                    bgcolor: index % 2 === 0 ? "#fff" : "#f9f9f9",
+                  }}
+                  onClick={() => setSelectedRow(row)}
+                >
+                  <TableCell
+                    padding="checkbox"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Checkbox
+                      checked={checkedRows.includes(row.id)}
+                      onChange={() => handleCheck(row.id)}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <Avatar src={row.avatar} sx={{ width: 30, height: 30 }} />
+                  </TableCell>
+                  <TableCell>{row.name}</TableCell>
+                  <TableCell>{row.designation}</TableCell>
+                  <TableCell>{row.company}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Box>
+
+      {!isSmallScreen && selectedRow && (
+        <Box
+          sx={{
+            flex: 0.4,
+            bgcolor: "#fff",
+            p: 3,
+            borderLeft: "1px solid #ddd",
+            marginLeft:2,
+            height: "100%",
+            overflow: "hidden",
+            position: "relative",
+          }}
+        >
+          <PanelContent />
+        </Box>
+      )}
+
+      {isSmallScreen && selectedRow && (
+        <Dialog open={true} onClose={handleClose} fullWidth maxWidth="sm">
+          <DialogTitle>
+            <Box display="flex" justifyContent="space-between" alignItems="center">
+              Details
+              <IconButton onClick={handleClose}>
+                <CloseIcon />
+              </IconButton>
+            </Box>
+          </DialogTitle>
+          <DialogContent
+            dividers
+            sx={{ maxHeight: "80vh", overflowY: "auto" }}
+          >
+            <PanelContent />
+          </DialogContent>
+        </Dialog>
+      )}
+    </Box>
+  );
+}
