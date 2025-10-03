@@ -1,146 +1,106 @@
 import React, { useState, useRef } from "react";
-import { HotTable } from "@handsontable/react";
+import { DataGrid } from "@mui/x-data-grid";
+import { Button } from "@mui/material";
 import * as XLSX from "xlsx";
-import "handsontable/dist/handsontable.full.css";
-import { Button, Box } from "@mui/material";
 
 const ExcelEditor = () => {
-  const [data, setData] = useState([]);
-  const [headers, setHeaders] = useState([]);
-  const hotRef = useRef(null);
+  const [rows, setRows] = useState([]);
+  const [columns, setColumns] = useState([]);
   const [fileName, setFileName] = useState("");
+  const fileInputRef = useRef(null);
 
   const handleFileUpload = (e) => {
-    const file = e.target.files[0];
+    const file = e.target.files?.[0];
     if (!file) return;
     setFileName(file.name);
 
     const reader = new FileReader();
     reader.onload = (evt) => {
-      const bstr = evt.target.result;
-      const wb = XLSX.read(bstr, { type: "binary" });
+      const buf = evt.target.result;
+      const wb = XLSX.read(buf, { type: "array" });
       const wsname = wb.SheetNames[0];
       const ws = wb.Sheets[wsname];
-      let jsonData = XLSX.utils.sheet_to_json(ws, { header: 1 });
+      const jsonData = XLSX.utils.sheet_to_json(ws, { header: 1, defval: "" });
 
-      if (jsonData.length === 0) return;
+      if (!jsonData.length) {
+        setColumns([]);
+        setRows([]);
+        return;
+      }
 
-      const maxCols = Math.max(...jsonData.map((row) => row.length));
-      jsonData = jsonData.map((row) => {
-        const newRow = [...row];
-        while (newRow.length < maxCols) newRow.push("");
-        return newRow;
+      const headers = jsonData[0] ?? [];
+      const headerFields = headers.map((h, i) => ({
+        field: `col${i}`,
+        headerName: h && h.toString().trim() ? h : `Column ${i + 1}`,
+        flex: 1,
+        editable: true,
+        sortable: true,
+      }));
+      setColumns(headerFields);
+
+      const rowData = jsonData.slice(1).map((row, rowIndex) => {
+        const obj = { id: rowIndex + 1 };
+        headers.forEach((_, i) => {
+          obj[`col${i}`] = row?.[i] ?? "";
+        });
+        return obj;
       });
 
-      setHeaders(jsonData[0]);
-      setData(jsonData.slice(1));
+      setRows(rowData);
     };
-    reader.readAsBinaryString(file);
+    reader.readAsArrayBuffer(file);
   };
 
-  const handleSubmit = () => {
-    const hotInstance = hotRef.current.hotInstance;
-    const updatedData = [headers, ...hotInstance.getData()];
+  const processRowUpdate = (newRow) => {
+    setRows((prev) => prev.map((r) => (r.id === newRow.id ? newRow : r)));
+    return newRow;
+  };
 
-    const ws = XLSX.utils.aoa_to_sheet(updatedData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
-
-    const wbout = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-    const blob = new Blob([wbout], { type: "application/octet-stream" });
-    const formData = new FormData();
-    formData.append("file", blob, fileName);
-
-    fetch("http://localhost:5000/api/upload-excel", {
-      method: "POST",
-      body: formData,
-    })
-      .then(() => alert("Excel submitted successfully"))
-      .catch(() => alert("Upload failed"));
+  const handleSave = () => {
+    alert("✅ Updates saved!");
   };
 
   return (
-    <Box
-      sx={{
-        padding: 3,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        width: "100%",
-      }}
-    >
+    <div style={{ padding: 20 }}>
+      <input
+        type="file"
+        accept=".xlsx,.xls"
+        onChange={handleFileUpload}
+        ref={fileInputRef}
+        style={{ display: "none" }}
+      />
+
       <Button
         variant="contained"
-        component="label"
-        sx={{
-          mb: 3,
-          px: 4,
-          py: 1.5,
-          fontWeight: "bold",
-          fontSize: "1rem",
-          borderRadius: "10px",
-          background: "linear-gradient(90deg, #1976d2, #42a5f5)",
-          boxShadow: "0 4px 15px rgba(0,0,0,0.2)",
-          "&:hover": {
-            background: "linear-gradient(90deg, #1565c0, #1e88e5)",
-          },
-        }}
+        color="primary"
+        sx={{ mt: 2 }}
+        onClick={() => fileInputRef.current?.click()}
       >
-        Choose File
-        <input
-          type="file"
-          accept=".xlsx, .xls"
-          onChange={handleFileUpload}
-          hidden
-        />
+        {fileName ? fileName : "Choose File"}
       </Button>
 
-      {data.length > 0 && (
-        <Box
-          sx={{
-            width: { xs: "100%", md: "80%" },
-            overflowX: "auto",
-          }}
-        >
-          <HotTable
-            ref={hotRef}
-            data={data}
-            colHeaders={headers}
-            rowHeaders={true}
-            width="100%"
-            height="500"
-            licenseKey="non-commercial-and-evaluation"
-            stretchH="all"
-            manualColumnResize={true}
-            manualRowResize={true}
-            contextMenu={true}
-            rowHeights={30}
-            colWidths={100}
-          />
+      {rows.length > 0 && (
+        <>
+          <div style={{ height: 500, width: "100%", marginTop: 20 }}>
+            <DataGrid
+              rows={rows}
+              columns={columns}
+              processRowUpdate={processRowUpdate}
+              disableRowSelectionOnClick
+            />
+          </div>
 
-          <Box sx={{ display: "flex", justifyContent: "center", mt: 3 }}>
-            <Button
-              variant="contained"
-              onClick={handleSubmit}
-              sx={{
-                px: 5,
-                py: 1.5,
-                fontWeight: "bold",
-                fontSize: "1rem",
-                borderRadius: "10px",
-                background: "linear-gradient(90deg, #00c853, #b2ff59)",
-                boxShadow: "0 4px 15px rgba(0,0,0,0.2)",
-                "&:hover": {
-                  background: "linear-gradient(90deg, #00b248, #a1ff49)",
-                },
-              }}
-            >
-              Submit
-            </Button>
-          </Box>
-        </Box>
+          <Button
+            onClick={handleSave}
+            variant="contained"
+            color="success"
+            sx={{ mt: 2 }}
+          >
+            Save
+          </Button>
+        </>
       )}
-    </Box>
+    </div>
   );
 };
 
